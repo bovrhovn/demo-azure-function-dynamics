@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -21,13 +22,10 @@ namespace Functions
             var watch = new Stopwatch();
             watch.Start();
             
-            //TODO: report from Dynamics and execution
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            log.LogInformation(requestBody);
             
-            // string name = req.Query["name"];
-            //
-            // string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            // dynamic data = JsonConvert.DeserializeObject(requestBody);
-            // name = name ?? data?.name;
+            //TODO: do some operations
             
             watch.Stop();
 
