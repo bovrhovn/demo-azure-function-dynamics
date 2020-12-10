@@ -7,9 +7,13 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.PowerPlatform.Cds.Client;
 
 namespace Functions
 {
+    /// <summary>
+    ///  sample repository - https://github.com/microsoft/PowerApps-Samples/tree/master/cds/orgsvc/C%23
+    /// </summary>
     public static class Webhook
     {
         [FunctionName("Webhook")]
@@ -21,15 +25,19 @@ namespace Functions
 
             var watch = new Stopwatch();
             watch.Start();
+
+            //getting connection string 
+            //https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect
+            var connectionString = Environment.GetEnvironmentVariable("CDSConnString");
             
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            log.LogInformation(requestBody);
+            var svc = new CdsServiceClient(connectionString);
+            var myCdsUserId = svc.GetMyCdsUserId();
             
-            //TODO: do some operations
+            //DO OTHER OPERATIONS
             
             watch.Stop();
 
-            string elapsedInfo = $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s)";
+            string elapsedInfo = $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s) for user @{myCdsUserId}";
 
             return (ActionResult) new OkObjectResult(elapsedInfo);
 
