@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -8,6 +7,9 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.PowerPlatform.Cds.Client;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Functions
 {
@@ -19,7 +21,9 @@ namespace Functions
         [FunctionName("Webhook")]
         public static async Task<IActionResult> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
-            HttpRequest req, ILogger log)
+            HttpRequest req, 
+            [Queue("e-commerce-emails")] IAsyncCollector<CloudQueueMessage> messages,
+            ILogger log)
         {
             log.LogInformation($"Webhook activated at {DateTime.Now}");
 
@@ -33,11 +37,31 @@ namespace Functions
             var svc = new CdsServiceClient(connectionString);
             var myCdsUserId = svc.GetMyCdsUserId();
             
-            //DO OTHER OPERATIONS
-            
+            var qe = new QueryExpression {EntityName = "account", ColumnSet = new ColumnSet()};
+            qe.ColumnSet.Columns.Add("name");
+
+            qe.LinkEntities.Add(new LinkEntity("account", "contact", "primarycontactid", "contactid",
+                JoinOperator.Inner));
+            qe.LinkEntities[0].Columns.AddColumns("firstname", "lastname");
+            qe.LinkEntities[0].EntityAlias = "primarycontact";
+
+            var ec = svc.RetrieveMultiple(qe);
+
+            string currentEmailContent = string.Empty;
+            foreach (var act in ec.Entities)
+            {
+                var accountName = act["name"]?.ToString();
+                var firstName = act.GetAttributeValue<AliasedValue>("primarycontact.firstname")?.Value?.ToString();
+                var lastName = act.GetAttributeValue<AliasedValue>("primarycontact.lastname")?.Value?.ToString();
+                
+                currentEmailContent += $"Account  {accountName}: {firstName} {lastName}";
+            }
+
+            await messages.AddAsync(new CloudQueueMessage(currentEmailContent));
+
             watch.Stop();
 
-            string elapsedInfo = $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s) for user @{myCdsUserId}";
+            var elapsedInfo = $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s) for user @{myCdsUserId}";
 
             return (ActionResult) new OkObjectResult(elapsedInfo);
 

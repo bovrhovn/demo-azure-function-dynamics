@@ -7,8 +7,6 @@
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SendGrid" Version="3.0.0" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.2.2" />
         <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.4" />
-        <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.28" />
-        <PackageReference Include="Microsoft.CrmSdk.CoreTools" Version="9.1.0.64" />
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.7" />
         <PackageReference Include="Microsoft.PowerPlatform.Cds.Client" Version="0.3.1-Alpha" />
     </ItemGroup>
