@@ -32,6 +32,10 @@ When you create contact, you should get the response and then it is up to you.
 
 This is how it looks, when you create new contact and webhook (which is running as Http Trigger in Azure Functions) get's called and then connects back to Dynamics, doing reads from contacts and sending email with that information.
 
-![video example](https://csacoresettings.blob.core.windows.net/public/Webhook-Create-Contact-Call.mp4)
+Check [this video](https://csacoresettings.blob.core.windows.net/public/Webhook-Create-Contact-Call.mp4) as an example.
+
+# CREDITS
+
+I use [Spectre.Console](https://github.com/spectresystems/spectre.console) library for showing beautiful CLI output. 
 
 
