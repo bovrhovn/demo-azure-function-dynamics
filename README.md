@@ -28,6 +28,10 @@ When you create contact, you should get the response and then it is up to you.
 
 ![webhook response](https://csacoresettings.blob.core.windows.net/public/Contact-Model-json-Dynamics.png)
 
+## EXAMPLE in practice
 
+This is how it looks, when you create new contact and webhook (which is running as Http Trigger in Azure Functions) get's called and then connects back to Dynamics, doing reads from contacts and sending email with that information.
+
+![video example](https://csacoresettings.blob.core.windows.net/public/Webhook-Create-Contact-Call.mp4)
 
 
