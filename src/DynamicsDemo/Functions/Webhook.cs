@@ -21,7 +21,7 @@ namespace Functions
         [FunctionName("Webhook")]
         public static async Task<IActionResult> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
-            HttpRequest req, 
+            HttpRequest req,
             [Queue("e-commerce-emails")] IAsyncCollector<CloudQueueMessage> messages,
             ILogger log)
         {
@@ -33,10 +33,10 @@ namespace Functions
             //getting connection string 
             //https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect
             var connectionString = Environment.GetEnvironmentVariable("CDSConnString");
-            
+
             var svc = new CdsServiceClient(connectionString);
             var myCdsUserId = svc.GetMyCdsUserId();
-            
+
             var qe = new QueryExpression {EntityName = "account", ColumnSet = new ColumnSet()};
             qe.ColumnSet.Columns.Add("name");
 
@@ -53,18 +53,19 @@ namespace Functions
                 var accountName = act["name"]?.ToString();
                 var firstName = act.GetAttributeValue<AliasedValue>("primarycontact.firstname")?.Value?.ToString();
                 var lastName = act.GetAttributeValue<AliasedValue>("primarycontact.lastname")?.Value?.ToString();
-                
+
                 currentEmailContent += $"Account  {accountName}: {firstName} {lastName}";
+                log.LogInformation(currentEmailContent);
             }
 
             await messages.AddAsync(new CloudQueueMessage(currentEmailContent));
 
             watch.Stop();
 
-            var elapsedInfo = $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s) for user @{myCdsUserId}";
-
+            var elapsedInfo =
+                $"Report and execution from Dynamics lasted for {watch.ElapsedMilliseconds} ms ({watch.Elapsed.Seconds} s) for user @{myCdsUserId}";
+            log.LogInformation(elapsedInfo);
             return (ActionResult) new OkObjectResult(elapsedInfo);
-
         }
     }
 }
